@@ -8,7 +8,7 @@
  * Ex: description: "A non-suspicious bottle of juice", weight = 700 kg
  *
  * @author Jacob Hubbard
- * @version Feb 3, 2026
+ * @version February 10, 2026
  */
 
 public class Item {

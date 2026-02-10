@@ -10,6 +10,9 @@
  * 
  * @author Lynn Marshall
  * @version October 21, 2012
+ *
+ * @author Jacob Hubbard 101348462
+ * @version February 10, 2026
  */
 
 public class CommandWords
@@ -44,7 +47,8 @@ public class CommandWords
     }
 
     /**
-     * Print all valid commands to System.out.
+     * Getter for valid commands
+     * @return the list of valid commands
      */
     public String getCommandList()
     {

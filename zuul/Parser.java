@@ -19,6 +19,9 @@ import java.util.StringTokenizer;
  * 
  * @author Lynn Marshall
  * @version October 21, 2012
+ *
+ * @author Jacob Hubbard 101348462
+ * @version February 10, 2026
  */
 public class Parser 
 {
@@ -70,7 +73,8 @@ public class Parser
     }
 
     /**
-     * Print out a list of valid command words.
+     * Getter for the valid commands
+     * @return the valid commands
      */
     public String getCommands()
     {

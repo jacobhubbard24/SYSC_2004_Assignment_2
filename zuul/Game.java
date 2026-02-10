@@ -16,6 +16,10 @@ import java.util.Stack;
  * @author Michael Kolling and David J. Barnes
  * @author Lynn Marshall
  * @version October 21, 2012
+ *
+ * @author Jacob Hubbard 101348462
+ * @version February 10, 2026
+ *
  */
 public class Game
 {
@@ -52,6 +56,7 @@ public class Game
         Item shortBanana = new Item("A shortish banana", 0.1);
         Item shrek = new Item("A life-size statue of Shrek in all of his greatness", 100);
         Item juice = new Item("A non-suspicious bottle of juice", 700);
+        Item stapler = new Item("A regular stapler", 1.5);
 
         // initialise room exits
         outside.setExit("east", theatre);
@@ -77,6 +82,8 @@ public class Game
         lab.addItem(shortBanana);
 
         lab.addItem(juice);
+
+        office.addItem(stapler);
 
         currentRoom = outside;  // start game outside
     }
@@ -247,7 +254,7 @@ public class Game
     }
 
     /**
-     * Go back 1 room
+     * Go back 1 room. Will loop back and forth between last 2 rooms visited
      * @param command
      */
     private void back(Command command)
