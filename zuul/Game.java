@@ -25,7 +25,8 @@ public class Game
 {
     private Parser parser;
     private Room currentRoom;
-    private Stack<Command> stackBack;
+    private Stack<Room> stackBack;
+    private Item currentItem;
 
     /**
      * Create the game and initialise its internal map.
@@ -34,7 +35,7 @@ public class Game
     {
         createRooms();
         parser = new Parser();
-        stackBack = new Stack<>();
+        stackBack = new Stack<Room>();
     }
 
     /**
@@ -43,20 +44,23 @@ public class Game
     private void createRooms()
     {
         Room outside, theatre, pub, lab, office;
-      
-        // create the rooms
-        outside = new Room("outside the main entrance of the university");
-        theatre = new Room("in a lecture theatre");
-        pub = new Room("in the campus pub");
-        lab = new Room("in a computing lab");
-        office = new Room("in the computing admin office");
 
-        Item averageBanana = new Item("Plenty big enough banana, honestly too big", 0.2);
-        Item longBanana = new Item("An absolutely massive banana", 0.4);
-        Item shortBanana = new Item("A shortish banana", 0.1);
-        Item shrek = new Item("A life-size statue of Shrek in all of his greatness", 100);
-        Item juice = new Item("A non-suspicious bottle of juice", 700);
-        Item stapler = new Item("A regular stapler", 1.5);
+        // create the rooms
+        outside = new Room("outside the main entrance of the university", 1);
+        theatre = new Room("in a lecture theatre", 2);
+        pub = new Room("in the campus pub", 3);
+        lab = new Room("in a computing lab", 4);
+        office = new Room("in the computing admin office", 5);
+
+        Item averageBanana = new Item("Banana", "Plenty big enough banana, honestly too big", 0.2);
+        Item shrek = new Item("Shrek", "A life-size statue of Shrek in all of his greatness", 100);
+        Item juice = new Item("Juice", "A non-suspicious bottle of juice", 700);
+        Item stapler = new Item("Stapler", "A regular stapler", 1.5);
+        Item paper = new Item("Paper", "A sheet of paper with some writing on it", 0.01);
+        Item pen = new Item("Pen", "An expensive-looking pen", 0.3);
+        Item mask = new Item("Mask", "A classic comedy mask", 0.5);
+        Item microscope = new Item("Microscope", "A ", 1);
+
 
         // initialise room exits
         outside.setExit("east", theatre);
@@ -75,11 +79,11 @@ public class Game
         // initialize room items
         outside.addItem(averageBanana);
 
-        theatre.addItem(longBanana);
+        theatre.addItem(mask);
 
         pub.addItem(shrek);
 
-        lab.addItem(shortBanana);
+        lab.addItem(paper);
 
         lab.addItem(juice);
 
@@ -92,12 +96,12 @@ public class Game
      * Main play routine.  Loops until end of play.
      */
     public void play()
-    {            
+    {
         printWelcome();
 
         // Enter the main command loop.  Here we repeatedly read commands and
         // execute them until the game is over.
-                
+
         boolean finished = false;
         while (! finished) {
             Command command = parser.getCommand();
@@ -121,11 +125,11 @@ public class Game
 
     /**
      * Given a command, process (that is: execute) the command.
-     * 
+     *
      * @param command The command to be processed
      * @return true If the command ends the game, false otherwise
      */
-    private boolean processCommand(Command command) 
+    private boolean processCommand(Command command)
     {
         boolean wantToQuit = false;
 
@@ -156,6 +160,12 @@ public class Game
         else if (commandWord.equals("stackBack")) {
             stackBack(command);
         }
+        else if (commandWord.equals("take")) {
+            take(command);
+        }
+        else if (commandWord.equals("drop")) {
+            drop(command);
+        }
         // else command not recognised.
         return wantToQuit;
     }
@@ -167,7 +177,7 @@ public class Game
      * Here we print a cryptic message and a list of the 
      * command words.
      */
-    private void printHelp() 
+    private void printHelp()
     {
         System.out.println("You are lost. You are alone. You wander");
         System.out.println("around at the university.");
@@ -176,13 +186,13 @@ public class Game
         System.out.println(parser.getCommands());
     }
 
-    /** 
+    /**
      * Try to go to one direction. If there is an exit, enter the new
      * room, otherwise print an error message.
-     * 
+     *
      * @param command The command to be processed
      */
-    private void goRoom(Command command) 
+    private void goRoom(Command command)
     {
         if(!command.hasSecondWord()) {
             // if there is no second word, we don't know where to go...
@@ -194,6 +204,7 @@ public class Game
 
         // Try to leave current room.
         Room nextRoom = currentRoom.getExit(direction);
+        stackBack.add(currentRoom);
 
         if (nextRoom == null) {
             System.out.println("There is no door!");
@@ -202,17 +213,16 @@ public class Game
             currentRoom = nextRoom;
             System.out.println(currentRoom.getLongDescription());
         }
-        stackBack.add(oppositeDirection(command));
     }
 
-    /** 
+    /**
      * "Quit" was entered. Check the rest of the command to see
      * whether we really quit the game.
-     * 
+     *
      * @param command The command to be processed
      * @return true, if this command quits the game, false otherwise
      */
-    private boolean quit(Command command) 
+    private boolean quit(Command command)
     {
         if(command.hasSecondWord()) {
             System.out.println("Quit what?");
@@ -266,7 +276,10 @@ public class Game
             System.out.println("Cannot go back from the start!");
         }
         else {
-            goRoom(stackBack.pop());
+            Room temp = currentRoom;
+            currentRoom = stackBack.peek();
+            stackBack.add(temp);
+            System.out.println(currentRoom.getLongDescription());
         }
     }
 
@@ -283,25 +296,92 @@ public class Game
             System.out.println("Cannot go back from the start!");
         }
         else {
-            goRoom(stackBack.pop());
-            stackBack.pop();
+            currentRoom = stackBack.pop();
+            System.out.println(currentRoom.getLongDescription());
         }
     }
 
     /**
-     * Generate the opposite direction from which you went
+     * Take an item from the current room
      * @param command
-     * @return the opposite direction
      */
-    private Command oppositeDirection(Command command)
+    private void take(Command command)
     {
-        String direction = command.getSecondWord();
-        return switch (direction) {
-            case "north" -> new Command("go", "south");
-            case "east" -> new Command("go", "west");
-            case "south" -> new Command("go", "north");
-            case "west" -> new Command("go", "east");
-            default -> null;
-        };
+        if (!command.hasSecondWord()) {
+            System.out.println("Take what?");
+            return;
+        }
+        String name = command.getSecondWord();
+
+        // Loop through the items in currentRoom and remove
+        for (Item item : currentRoom.getItems())
+        {
+            if (name.equals(item.getDescription()))
+            {
+                currentItem = item;
+                currentRoom.getItems().remove(item);
+                System.out.println("You picked up " + item.getName());
+                return;
+            }
+        }
+        System.out.println("There is no " + name + " in the room");
+
+    }
+
+    /**
+     * Drop an item into the current room
+     * @param command
+     */
+    private void drop(Command command)
+    {
+        if (!command.hasSecondWord()) {
+            System.out.println("Drop what?");
+        }
+        else {
+            System.out.println(currentRoom.getLongDescription());
+        }
+
+    }
+
+    /**
+     * Attempts to charge the beamer.
+     * @param command
+     */
+    private void charge(Command command)
+    {
+        if (command.hasSecondWord()) {
+            System.out.println("Charge what?");
+        }
+        else if (currentItem instanceof Beamer beamer)
+        {
+            beamer.charge(currentRoom);
+            System.out.println("Charged beamer with current room!");
+        }
+    }
+
+    /**
+     * Attempts to fire the beamer
+     * @param command
+     */
+    private void fire(Command command)
+    {
+        if (command.hasSecondWord()) {
+            System.out.println("Charge what?");
+        }
+        else if (currentItem instanceof Beamer beamer)
+        {
+            Room nextRoom = beamer.fire();
+            if (nextRoom != null)
+            {
+                currentRoom = beamer.fire();
+                System.out.println("Beamer fired! Now in: " + currentRoom.getLongDescription());
+            }
+            else {
+                System.out.println("You have not charged!");
+            }
+        }
+        else {
+            System.out.println("Current item is not a beamer!");
+        }
     }
 }

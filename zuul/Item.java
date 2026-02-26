@@ -14,13 +14,16 @@
 public class Item {
     private String description;
     private double weight;
+    private String name;
 
     /** Constructor to initialize the item
      *
+     * @param name
      * @param description
      * @param weight
      */
-    public Item(String description, double weight) {
+    public Item(String name, String description, double weight) {
+        this.name = name;
         this.description = description;
         this.weight = weight;
     }
@@ -29,7 +32,15 @@ public class Item {
      * Getter for description
      * @return description
      */
-    public String  getDescription() {
+    public String getDescription() {
         return description;
+    }
+
+    /**
+     * Getter for name
+     * @return name
+     */
+    public String getName() {
+        return name;
     }
 }
