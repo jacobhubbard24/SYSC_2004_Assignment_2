@@ -12,14 +12,14 @@
  * @version October 21, 2012
  *
  * @author Jacob Hubbard 101348462
- * @version February 10, 2026
+ * @version February 27, 2026 (updated for Assignment 2)
  */
 
 public class CommandWords
 {
     // a constant array that holds all valid command words
     private static final String[] validCommands = {
-        "go", "quit", "help", "look", "eat", "back", "stackBack"
+        "go", "quit", "help", "look", "eat", "back", "stackBack", "take", "drop", "charge", "fire"
     };
 
     /**
@@ -54,7 +54,7 @@ public class CommandWords
     {
         String result = "";
         for(String command: validCommands) {
-            result = command + " ";
+            result += command + " ";
         }
         return result;
     }

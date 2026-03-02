@@ -1,18 +1,18 @@
 /**
  * Class Beamer - an item in an adventure game
- *
+ *<p></p>
  * This class is part of the "World of Zuul" application.
  * "World of Zuul" is a very simple, text based adventure game.
- *
+ *<p></p>
  * A "Beamer" represents an item that can teleport the player
  * back to the room it was charged in
  *
- * @author Jacob Hubbard
- * @version February 26, 2026
+ * @author Jacob Hubbard 101348462
+ * @version February 27, 2026
  */
 
 public class Beamer extends Item{
-    private Boolean charged;
+    private boolean charged;
     private Room room;
 
     /** Constructor to initialize the beamer.
@@ -29,30 +29,28 @@ public class Beamer extends Item{
 
     /**
      * Charges the beamer
+     * @param _room the room to charge the beamer with
      */
-    public void charge(Room _room){
-        if (!charged){
-            charged = true;
-            room = _room;
-        }
-        else {
-            System.out.println("You have already charged");
-        }
+    public void charge(Room room){
+        charged = true;
+        this.room = room;
+        System.out.println("Charging beamer with current room!");
     }
 
     /**
-     * Fire the beamer. If successful, returns the room to beam to,
-     * otherwise returns null
+     * Getter for charged
+     * @return charged
+     */
+    public boolean getCharged(){
+        return charged;
+    }
+
+    /**
+     * Fire the beamer, returning the room to beam to
      * @return the room to beam to
      */
     public Room fire(){
-        if (!charged){
-            System.out.println("Canot fire as this beamer is not charged");
-            return null;
-        }
-        else{
-            charged = false;
-            return room;
-        }
+        charged = false;
+        return room;
     }
 }

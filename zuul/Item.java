@@ -4,11 +4,11 @@
  * This class is part of the "World of Zuul" application.
  * "World of Zuul" is a very simple, text based adventure game.
  *
- * An "Item" represents an item with a description and a weight.
+ * An "Item" represents an item with a name, description, and weight.
  * Ex: description: "A non-suspicious bottle of juice", weight = 700 kg
  *
- * @author Jacob Hubbard
- * @version February 10, 2026
+ * @author Jacob Hubbard 101348462
+ * @version February 24, 2026 (updated for assignment 2)
  */
 
 public class Item {
@@ -29,11 +29,11 @@ public class Item {
     }
 
     /**
-     * Getter for description
-     * @return description
+     * Getter for name & description
+     * @return "name: description"
      */
     public String getDescription() {
-        return description;
+        return name + ": " + description;
     }
 
     /**

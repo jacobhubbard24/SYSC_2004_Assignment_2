@@ -1,5 +1,4 @@
 import java.util.Stack;
-
 /**
  * This class is the main class of the "World of Zuul" application.
  * "World of Zuul" is a very simple, text based adventure game.  Users
@@ -18,21 +17,25 @@ import java.util.Stack;
  * @version October 21, 2012
  *
  * @author Jacob Hubbard 101348462
- * @version February 10, 2026
+ * @version February 27, 2026 (updated for Assignment 2)
  *
  */
 public class Game
 {
-    private Parser parser;
+    private static Parser parser;
     private Room currentRoom;
+    private Room previousRoom;
     private Stack<Room> stackBack;
     private Item currentItem;
+    private int numItemsTaken;
+    private static final int numItemsAllowedTakenBeforeEat = 5;
 
     /**
      * Create the game and initialise its internal map.
      */
     public Game()
     {
+        numItemsTaken = 0;
         createRooms();
         parser = new Parser();
         stackBack = new Stack<Room>();
@@ -44,23 +47,27 @@ public class Game
     private void createRooms()
     {
         Room outside, theatre, pub, lab, office;
+        TransporterRoom transporter;
 
         // create the rooms
-        outside = new Room("outside the main entrance of the university", 1);
-        theatre = new Room("in a lecture theatre", 2);
-        pub = new Room("in the campus pub", 3);
-        lab = new Room("in a computing lab", 4);
-        office = new Room("in the computing admin office", 5);
+        outside = new Room("outside the main entrance of the university");
+        theatre = new Room("in a lecture theatre");
+        pub = new Room("in the campus pub");
+        lab = new Room("in a computing lab");
+        office = new Room("in the computing admin office");
+        transporter = new TransporterRoom("in a transporter room");
 
-        Item averageBanana = new Item("Banana", "Plenty big enough banana, honestly too big", 0.2);
-        Item shrek = new Item("Shrek", "A life-size statue of Shrek in all of his greatness", 100);
-        Item juice = new Item("Juice", "A non-suspicious bottle of juice", 700);
-        Item stapler = new Item("Stapler", "A regular stapler", 1.5);
-        Item paper = new Item("Paper", "A sheet of paper with some writing on it", 0.01);
-        Item pen = new Item("Pen", "An expensive-looking pen", 0.3);
-        Item mask = new Item("Mask", "A classic comedy mask", 0.5);
-        Item microscope = new Item("Microscope", "A ", 1);
-
+        Item paperclip = new Item("paperclip", "A perfectly average paperclip", 2);
+        Item shrek = new Item("shrek", "A life-size statue of Shrek in all of his greatness", 100);
+        Item jar = new Item("jar", "A non-suspicious jar", 12000);
+        Item stapler = new Item("stapler", "A regular stapler", 1.5);
+        Item paper = new Item("paper", "A sheet of paper with some writing on it", 0.01);
+        Item pen = new Item("pen", "An expensive-looking pen", 0.3);
+        Item mask = new Item("mask", "A classic comedy mask", 0.5);
+        Item microscope = new Item("microscope", "A high-power microscope", 1);
+        Item cookie = new Item("cookie", "A scrumptious chocolate chip cookie", 0.1);
+        Item beamer1 = new Beamer("beamer", "A beamer that lets you teleport back to this room after being charged and fired", 1.3);
+        Item beamer2 = new Beamer("beamer", "A beamer that lets you teleport back to this room after being charged and fired", 1.3);
 
         // initialise room exits
         outside.setExit("east", theatre);
@@ -68,6 +75,7 @@ public class Game
         outside.setExit("west", pub);
 
         theatre.setExit("west", outside);
+        theatre.setExit("east", transporter);
 
         pub.setExit("east", outside);
 
@@ -75,19 +83,31 @@ public class Game
         lab.setExit("east", office);
 
         office.setExit("west", lab);
+        office.setExit("north", transporter);
+
+        transporter.setExit("west", theatre);
+        transporter.setExit("south", office);
 
         // initialize room items
-        outside.addItem(averageBanana);
+        outside.addItem(paperclip);
+        outside.addItem(beamer1);
 
         theatre.addItem(mask);
+        theatre.addItem(cookie);
 
         pub.addItem(shrek);
+        pub.addItem(cookie);
 
         lab.addItem(paper);
-
-        lab.addItem(juice);
+        lab.addItem(jar);
+        lab.addItem(cookie);
+        lab.addItem(microscope);
 
         office.addItem(stapler);
+        office.addItem(pen);
+        office.addItem(cookie);
+
+        transporter.addItem(beamer2);
 
         currentRoom = outside;  // start game outside
     }
@@ -166,6 +186,12 @@ public class Game
         else if (commandWord.equals("drop")) {
             drop(command);
         }
+        else if (commandWord.equals("charge")) {
+            charge(command);
+        }
+        else if (commandWord.equals("fire")) {
+            fire(command);
+        }
         // else command not recognised.
         return wantToQuit;
     }
@@ -204,14 +230,21 @@ public class Game
 
         // Try to leave current room.
         Room nextRoom = currentRoom.getExit(direction);
-        stackBack.add(currentRoom);
 
         if (nextRoom == null) {
             System.out.println("There is no door!");
         }
         else {
+            previousRoom = currentRoom;
+            stackBack.add(currentRoom);
             currentRoom = nextRoom;
             System.out.println(currentRoom.getLongDescription());
+            if (currentItem != null) {
+                System.out.println("Holding: " + currentItem.getName());
+            }
+            else{
+                System.out.println("Holding nothing");
+            }
         }
     }
 
@@ -244,6 +277,12 @@ public class Game
         }
         else {
             System.out.println(currentRoom.getLongDescription());
+            if (currentItem != null) {
+                System.out.println("Holding: " + currentItem.getName());
+            }
+            else{
+                System.out.println("Holding nothing");
+            }
         }
 
     }
@@ -258,8 +297,13 @@ public class Game
         if(command.hasSecondWord()) {
             System.out.println("Eat what?");
         }
+        else if (currentItem.getName().equals("Cookie")){
+            System.out.println("You have eaten your cookie!");
+            currentItem = null;
+            numItemsTaken = 0;
+        }
         else {
-            System.out.println("You have eaten and are no longer hungry.");
+            System.out.println("You are not carrying food.");
         }
     }
 
@@ -272,13 +316,14 @@ public class Game
         if (command.hasSecondWord()) {
             System.out.println("Back what?");
         }
-        else if (stackBack.isEmpty()) {
+        else if (previousRoom == null) {
             System.out.println("Cannot go back from the start!");
         }
         else {
-            Room temp = currentRoom;
-            currentRoom = stackBack.peek();
-            stackBack.add(temp);
+            Room nextRoom = previousRoom;
+            stackBack.add(currentRoom);
+            previousRoom = currentRoom;
+            currentRoom = nextRoom;
             System.out.println(currentRoom.getLongDescription());
         }
     }
@@ -296,6 +341,7 @@ public class Game
             System.out.println("Cannot go back from the start!");
         }
         else {
+            previousRoom = currentRoom;
             currentRoom = stackBack.pop();
             System.out.println(currentRoom.getLongDescription());
         }
@@ -311,21 +357,32 @@ public class Game
             System.out.println("Take what?");
             return;
         }
+
         String name = command.getSecondWord();
+
+        // Check to see if you can pick up another item
+        if (numItemsTaken >= numItemsAllowedTakenBeforeEat && !name.equals("Cookie")) {
+            if (currentItem != null && currentItem.getName().equals("Cookie")){
+                System.out.println("You need to eat your cookie before picking up any other items");
+            }
+            else{
+                System.out.println("You need to eat a cookie before picking up any other items");
+            }
+            return;
+        }
 
         // Loop through the items in currentRoom and remove
         for (Item item : currentRoom.getItems())
         {
-            if (name.equals(item.getDescription()))
-            {
+            if (name.equals(item.getName())) {
                 currentItem = item;
-                currentRoom.getItems().remove(item);
+                currentRoom.removeItem(item);
                 System.out.println("You picked up " + item.getName());
+                numItemsTaken += 1;
                 return;
             }
         }
         System.out.println("There is no " + name + " in the room");
-
     }
 
     /**
@@ -334,13 +391,19 @@ public class Game
      */
     private void drop(Command command)
     {
-        if (!command.hasSecondWord()) {
+        if (command.hasSecondWord()) {
             System.out.println("Drop what?");
         }
         else {
-            System.out.println(currentRoom.getLongDescription());
+            if (currentItem == null) {
+                System.out.println("You need to pick up an item before you can drop");
+            }
+            else {
+                currentRoom.addItem(currentItem);
+                currentItem = null;
+                System.out.println("You dropped your item!");
+            }
         }
-
     }
 
     /**
@@ -354,8 +417,16 @@ public class Game
         }
         else if (currentItem instanceof Beamer beamer)
         {
-            beamer.charge(currentRoom);
-            System.out.println("Charged beamer with current room!");
+            if (!beamer.getCharged())
+            {
+                beamer.charge(currentRoom);
+            }
+            else{
+                System.out.println("You have already charged your beamer!");
+            }
+        }
+        else {
+            System.out.println("Current Item is not a beamer!");
         }
     }
 
@@ -370,14 +441,18 @@ public class Game
         }
         else if (currentItem instanceof Beamer beamer)
         {
-            Room nextRoom = beamer.fire();
-            if (nextRoom != null)
+            if (beamer.getCharged())
             {
-                currentRoom = beamer.fire();
-                System.out.println("Beamer fired! Now in: " + currentRoom.getLongDescription());
+                Room nextRoom = beamer.fire();
+                if (nextRoom != null)
+                {
+                    previousRoom = currentRoom;
+                    currentRoom = nextRoom;
+                    System.out.println("Beamer fired!\n" + currentRoom.getLongDescription());
+                }
             }
             else {
-                System.out.println("You have not charged!");
+                System.out.println("You need to charged your beamer first!");
             }
         }
         else {

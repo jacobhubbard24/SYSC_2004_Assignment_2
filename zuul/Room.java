@@ -5,10 +5,10 @@ import java.util.Iterator;
 
 /**
  * Class Room - a room in an adventure game.
- *
+ *<p>
  * This class is part of the "World of Zuul" application. 
  * "World of Zuul" is a very simple, text based adventure game.  
- *
+ *<p>
  * A "Room" represents one location in the scenery of the game.  It is 
  * connected to other rooms via exits.  For each existing exit, the room 
  * stores a reference to the neighboring room.
@@ -18,6 +18,9 @@ import java.util.Iterator;
  * 
  * @author Lynn Marshall
  * @version October 21, 2012
+ *
+ * @author Jacob Hubbard 101348462
+ * @version Feb 27 2026 (updated for Assignment 2)
  */
 
 public class Room 
@@ -25,7 +28,7 @@ public class Room
     private String description;
     private HashMap<String, Room> exits;      // stores exits of this room.
     private ArrayList<Item> items;
-    private static int id;
+    protected static ArrayList<Room> allRooms = new ArrayList<>();
 
     /**
      * Create a room described "description". Initially, it has
@@ -34,12 +37,12 @@ public class Room
      * 
      * @param description The room's description.
      */
-    public Room(String description, int id)
+    public Room(String description)
     {
         this.description = description;
         exits = new HashMap<String, Room>();
         this.items = new ArrayList<Item>();
-        this.id = id;
+        allRooms.add(this);
     }
 
     /**
@@ -81,7 +84,7 @@ public class Room
         longDescription += "Items:";
         for (Item item : items)
         {
-            longDescription = longDescription + "\n" + item.getDescription();
+            longDescription = longDescription + "\n - " + item.getDescription();
         }
         return longDescription + "\n" + getExitString();
     }
@@ -125,11 +128,29 @@ public class Room
     }
 
     /**
+     * Remove an item from the room
+     * @param item
+     */
+    public void removeItem(Item item)
+    {
+        items.remove(item);
+    }
+
+    /**
      * Getter for items arraylist
      * @return items
      */
     public ArrayList<Item> getItems() {
         return items;
+    }
+
+    /**
+     * Getter for allRooms
+     * @return allRooms
+     */
+    static public ArrayList<Room> getAllRooms()
+    {
+        return allRooms;
     }
 }
 
