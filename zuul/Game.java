@@ -35,7 +35,7 @@ public class Game
      */
     public Game()
     {
-        numItemsTaken = 0;
+        numItemsTaken = 5;
         createRooms();
         parser = new Parser();
         stackBack = new Stack<Room>();
@@ -210,6 +210,12 @@ public class Game
         System.out.println();
         System.out.println("Your command words are:");
         System.out.println(parser.getCommands());
+        if (currentItem != null) {
+            System.out.println("Holding: " + currentItem.getName());
+        }
+        else{
+            System.out.println("Holding nothing");
+        }
     }
 
     /**
@@ -281,10 +287,9 @@ public class Game
                 System.out.println("Holding: " + currentItem.getName());
             }
             else{
-                System.out.println("Holding nothing");
+                System.out.println("Holding: Nothing");
             }
         }
-
     }
 
     /**
@@ -297,13 +302,13 @@ public class Game
         if(command.hasSecondWord()) {
             System.out.println("Eat what?");
         }
-        else if (currentItem.getName().equals("Cookie")){
+        else if (currentItem != null && currentItem.getName().equals("cookie")){
             System.out.println("You have eaten your cookie!");
             currentItem = null;
             numItemsTaken = 0;
         }
         else {
-            System.out.println("You are not carrying food.");
+            System.out.println("You are not carrying food. Cookies are the only food");
         }
     }
 
@@ -325,6 +330,12 @@ public class Game
             previousRoom = currentRoom;
             currentRoom = nextRoom;
             System.out.println(currentRoom.getLongDescription());
+            if (currentItem != null) {
+                System.out.println("Holding: " + currentItem.getName());
+            }
+            else{
+                System.out.println("Holding nothing");
+            }
         }
     }
 
@@ -344,6 +355,12 @@ public class Game
             previousRoom = currentRoom;
             currentRoom = stackBack.pop();
             System.out.println(currentRoom.getLongDescription());
+            if (currentItem != null) {
+                System.out.println("Holding: " + currentItem.getName());
+            }
+            else{
+                System.out.println("Holding nothing");
+            }
         }
     }
 
@@ -360,29 +377,29 @@ public class Game
 
         String name = command.getSecondWord();
 
-        // Check to see if you can pick up another item
-        if (numItemsTaken >= numItemsAllowedTakenBeforeEat && !name.equals("Cookie")) {
-            if (currentItem != null && currentItem.getName().equals("Cookie")){
-                System.out.println("You need to eat your cookie before picking up any other items");
-            }
-            else{
-                System.out.println("You need to eat a cookie before picking up any other items");
-            }
-            return;
-        }
-
         // Loop through the items in currentRoom and remove
         for (Item item : currentRoom.getItems())
         {
             if (name.equals(item.getName())) {
-                currentItem = item;
-                currentRoom.removeItem(item);
-                System.out.println("You picked up " + item.getName());
-                numItemsTaken += 1;
+                // Check to see if you can pick up another item
+                if (numItemsTaken >= numItemsAllowedTakenBeforeEat && !name.equals("cookie")) {
+                    if (currentItem != null && currentItem.getName().equals("cookie")){
+                        System.out.println("You need to eat your cookie before picking up any other items");
+                    }
+                    else{
+                        System.out.println("You need to eat a cookie before picking up any other items");
+                    }
+                }
+                else {
+                    currentItem = item;
+                    currentRoom.removeItem(item);
+                    System.out.println("You picked up " + item.getName());
+                    numItemsTaken += 1;
+                }
                 return;
             }
         }
-        System.out.println("There is no " + name + " in the room");
+        System.out.println("There is no " + name + " in the room (case sensitive)");
     }
 
     /**
@@ -452,7 +469,7 @@ public class Game
                 }
             }
             else {
-                System.out.println("You need to charged your beamer first!");
+                System.out.println("You need to charge your beamer first!");
             }
         }
         else {

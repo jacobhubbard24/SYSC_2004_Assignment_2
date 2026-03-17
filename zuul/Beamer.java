@@ -32,7 +32,7 @@ public class Beamer extends Item{
      * @param _room the room to charge the beamer with
      */
     public void charge(Room room){
-        charged = true;
+        this.charged = true;
         this.room = room;
         System.out.println("Charging beamer with current room!");
     }
